@@ -163,6 +163,37 @@ Refer to the [MLflow tracing documentation](https://docs.databricks.com/aws/en/m
 
 Set `REDACT_PII=true` in `.env` to strip personally identifiable information from MLflow trace spans before they are stored. Redaction uses [Presidio](https://microsoft.github.io/presidio/) and covers names, emails, phone numbers, SSNs, credit card numbers, and postal addresses.
 
+## Deployment
+
+`deploy_agent.py` packages the agent as an MLflow `pyfunc` model and optionally registers it in **Databricks Unity Catalog** for serving.
+
+### What the script does
+
+1. **Smoke-tests** the agent locally with a sample prediction before packaging.
+2. **Logs** the model to MLflow, bundling `src/instructed_retriever/` and `artifacts/` as code paths, along with pip requirements (including the spaCy model wheel for PII redaction).
+3. **Reloads** the logged model from the MLflow artifact store and runs a second prediction to confirm the packaged model works end-to-end.
+4. **Registers** the model to Unity Catalog if `MODEL_CATALOG`, `MODEL_SCHEMA`, and `MODEL_NAME` are set in `.env`. Local file paths (e.g. `SYSTEM_SPECS_PATH`, `OPTIMIZED_PROMPT_PATH`) are automatically remapped to their in-container equivalents (`/model/code/...`).
+
+### Required `.env` variables
+
+```
+# Required for model packaging
+MLFLOW_TRACKING_URI=databricks          # or a local URI for local-only packaging
+
+# Optional — set all three to register to Unity Catalog
+MODEL_CATALOG=my_catalog
+MODEL_SCHEMA=my_schema
+MODEL_NAME=instructed_retriever
+```
+
+### Run
+
+```bash
+poetry run python deploy_agent.py
+```
+
+The script logs progress at each stage. A successful run ends with a registered model version in Unity Catalog that can be deployed to a Databricks Model Serving endpoint.
+
 ## Related Work & Positioning
 
 This project addresses well-known limitations of naive RAG pipelines — sometimes called "advanced RAG" or "agentic RAG" in the literature. Compared to frameworks like LangChain RAG, LlamaIndex, Haystack, or vanilla DSPy RAG pipelines, the instructed retriever is distinguished by:

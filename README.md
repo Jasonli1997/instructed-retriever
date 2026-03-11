@@ -1,10 +1,15 @@
-# Instructed Retriever
+# Instructed Retriever — Advanced RAG with System-Level Reasoning
 
-A retrieval agent that propagates full system specifications — index schema, user instructions, and labeled examples — through every stage of the search pipeline, enabling reliable instruction-following that standard RAG cannot achieve.
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DSPy](https://img.shields.io/badge/built%20with-DSPy-blueviolet)](https://dspy.ai)
+[![MLflow](https://img.shields.io/badge/traced%20with-MLflow-orange)](https://mlflow.org)
+
+**An open-source Python RAG framework** that propagates full system specifications — index schema, user instructions, and labeled examples — through every stage of the retrieval-augmented generation (RAG) pipeline, enabling reliable instruction-following that standard RAG cannot achieve.
 
 > **Background:** This project implements the architecture described in [Instructed Retriever: Unlocking System-Level Reasoning for Search Agents](https://www.databricks.com/blog/instructed-retriever-unlocking-system-level-reasoning-search-agents). The core insight is that standard RAG ignores system-level context after the initial query embedding — the instructed retriever keeps that context alive through query decomposition, metadata-aware structured filtering, contextual reranking, and grounded response generation.
 
-## What Makes This Different from RAG
+## What Makes This Different from Standard RAG
 
 | Capability | RAG | Instructed Retriever |
 |---|---|---|
@@ -157,3 +162,16 @@ Refer to the [MLflow tracing documentation](https://docs.databricks.com/aws/en/m
 ## PII Redaction
 
 Set `REDACT_PII=true` in `.env` to strip personally identifiable information from MLflow trace spans before they are stored. Redaction uses [Presidio](https://microsoft.github.io/presidio/) and covers names, emails, phone numbers, SSNs, credit card numbers, and postal addresses.
+
+## Related Work & Positioning
+
+This project addresses well-known limitations of naive RAG pipelines — sometimes called "advanced RAG" or "agentic RAG" in the literature. Compared to frameworks like LangChain RAG, LlamaIndex, Haystack, or vanilla DSPy RAG pipelines, the instructed retriever is distinguished by:
+
+- **Zero framework lock-in** for the retrieval layer — bring your own vector store
+- **Single config file** (`system_specs.yaml`) drives all retrieval behavior — no code changes needed to adapt to a new domain
+- **Full async** throughout — designed for low-latency production serving
+- **First-class MLflow integration** — every request is traced and exportable to Databricks Unity Catalog
+
+## Topics
+
+`rag` · `retrieval-augmented-generation` · `advanced-rag` · `agentic-rag` · `vector-search` · `semantic-search` · `query-decomposition` · `reranking` · `llm` · `dspy` · `databricks` · `mlflow` · `instruction-following` · `information-retrieval` · `python`

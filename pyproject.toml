@@ -1,8 +1,24 @@
 [tool.poetry]
 name = "instructed-retriever"
 version = "0.1.0"
-description = "A retrieval agent that propagates system specifications through every stage of the search pipeline"
+description = "Advanced RAG framework — propagates system specifications (index schema, instructions, examples) through every stage of the retrieval pipeline for reliable instruction-following"
 readme = "README.md"
+keywords = [
+    "rag",
+    "retrieval-augmented-generation",
+    "advanced-rag",
+    "agentic-rag",
+    "vector-search",
+    "semantic-search",
+    "llm",
+    "dspy",
+    "databricks",
+    "mlflow",
+    "query-decomposition",
+    "reranking",
+    "instruction-following",
+    "information-retrieval",
+]
 packages = [{ include = "instructed_retriever", from = "src" }]
 
 [tool.poetry.dependencies]

@@ -84,7 +84,9 @@ class InstructedRetrieverRunner(dspy.Module):
             )
 
         else:
-            logger.info("No reranker configured; results will be ranked by vector similarity score.")
+            logger.info(
+                "No reranker configured; results will be ranked by vector similarity score."
+            )
 
         self.vector_store = DatabricksVectorSearch(
             endpoint=self.config.vs_endpoint,

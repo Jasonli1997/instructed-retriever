@@ -62,9 +62,7 @@ def deploy_responses_agent(model_info: ModelInfo) -> None:
         model_uri=model_info.model_uri,
         name=uc_model_name,
     )
-    logger.info(
-        "Registered model: %s version %s", uc_model_name, uc_registered.version
-    )
+    logger.info("Registered model: %s version %s", uc_model_name, uc_registered.version)
 
 
 def main() -> None:

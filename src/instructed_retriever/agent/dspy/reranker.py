@@ -4,7 +4,6 @@ import abc
 import json
 import logging
 import time
-from typing import Optional
 
 import dspy
 import mlflow
@@ -66,7 +65,7 @@ class Reranker(abc.ABC):
         self,
         query: str,
         documents: list[CustomDocument],
-        system_specifications: Optional[SystemSpecifications],
+        system_specifications: SystemSpecifications | None,
     ) -> list[CustomDocument]:
         """Rerank the given documents and return the sorted list."""
 
@@ -99,7 +98,7 @@ class InstructedReranker(Reranker):
         self,
         query: str,
         documents: list[CustomDocument],
-        system_specifications: Optional[SystemSpecifications],
+        system_specifications: SystemSpecifications | None,
     ) -> list[CustomDocument]:
         if not documents:
             return documents
@@ -132,7 +131,7 @@ class InstructedReranker(Reranker):
                 logger.warning("Batch scoring failed: %s. Assigning default scores.", e)
                 new_scores = [(0.5, "Reranking failed, using default score")] * len(batch_new)
 
-            for doc, (score, reasoning) in zip(batch_new, new_scores):
+            for doc, (score, reasoning) in zip(batch_new, new_scores, strict=False):
                 doc.rerank_score = score
                 doc.rerank_reasoning = reasoning
 
@@ -238,7 +237,7 @@ class DatabricksReranker(Reranker):
         self,
         query: str,
         documents: list[CustomDocument],
-        system_specifications: Optional[SystemSpecifications],
+        system_specifications: SystemSpecifications | None,
     ) -> list[CustomDocument]:
         queries = [query] * len(documents)
         data = {"inputs": {"query": queries, "context": [doc.page_content for doc in documents]}}
@@ -261,7 +260,7 @@ class DatabricksReranker(Reranker):
             )
 
         scores = [e["0"] for e in response.json()["predictions"]]
-        for doc, score in zip(documents, scores):
+        for doc, score in zip(documents, scores, strict=False):
             doc.rerank_score = score
 
         documents.sort(key=lambda x: x.rerank_score or 0.0, reverse=True)

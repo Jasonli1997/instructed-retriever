@@ -1,12 +1,10 @@
-from typing import Optional
-
 import dspy
 
 from instructed_retriever.agent.dspy.schemas import StructuredQuery
 
 
 class QueryRewriterSignature(dspy.Signature):
-    system_specifications: Optional[str] = dspy.InputField(
+    system_specifications: str | None = dspy.InputField(
         description=(
             "Retrieval-focused system specifications including index schema, "
             "retrieval instructions, examples, and category classifications. "
@@ -21,7 +19,7 @@ class QueryRewriterSignature(dspy.Signature):
 
 
 class AnswerGeneratorSignature(dspy.Signature):
-    system_specifications: Optional[str] = dspy.InputField(
+    system_specifications: str | None = dspy.InputField(
         description=(
             "Generation-focused system specifications including response constraints, "
             "answer generation instructions, and category classifications. "
@@ -42,7 +40,7 @@ class AnswerGeneratorSignature(dspy.Signature):
 
 
 class CategoryClassifierSignature(dspy.Signature):
-    system_specifications: Optional[str] = dspy.InputField(
+    system_specifications: str | None = dspy.InputField(
         description=(
             "Categorization context including expected categories with descriptions "
             "and labeled examples. May be None if not configured."

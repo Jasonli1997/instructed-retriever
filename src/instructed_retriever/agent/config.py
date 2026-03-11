@@ -57,8 +57,7 @@ class InstructedRetrieverConfiguration(BaseSettings):
 
         if self.otel_catalog is None or self.otel_schema is None:
             raise ValueError(
-                "Both otel_catalog and otel_schema must be set when "
-                "mlflow_trace_export_to_uc=true."
+                "Both otel_catalog and otel_schema must be set when mlflow_trace_export_to_uc=true."
             )
         os.environ["MLFLOW_TRACING_DESTINATION"] = f"{self.otel_catalog}.{self.otel_schema}"
 

@@ -100,7 +100,7 @@ class FilterCondition(BaseModel):
     @model_validator(mode="after")
     def coerce_in_values(self) -> "FilterCondition":
         if self.operator == FilterOperator.IN:
-            if isinstance(self.value, (list, tuple, set)):
+            if isinstance(self.value, list | tuple | set):
                 self.value = list(self.value)
             else:
                 self.value = [self.value]

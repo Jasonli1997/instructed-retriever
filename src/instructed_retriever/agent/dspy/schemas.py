@@ -21,9 +21,7 @@ class CustomDocument(BaseModel):
     rerank_score: float | None = Field(
         default=None, description="Relevance score from the reranker"
     )
-    rerank_reasoning: str | None = Field(
-        default=None, description="Explanation from the reranker"
-    )
+    rerank_reasoning: str | None = Field(default=None, description="Explanation from the reranker")
 
 
 class StructuredQuery(BaseModel):

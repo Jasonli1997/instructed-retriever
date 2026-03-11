@@ -1,0 +1,125 @@
+# System Specifications — FooBrand Product Q&A
+#
+# This example is taken from the Databricks "Instructed Retriever" blog post:
+# https://www.databricks.com/blog/instructed-retriever-unlocking-system-level-reasoning-search-agents
+#
+# Use case: A product Q&A assistant for FooBrand consumer electronics.
+# The user asks questions like "What is the battery life expectancy for FooBrand products?"
+# The system decomposes the query into (a) a search over recent customer reviews and
+# (b) a search over official product specification documents, then generates a concise answer.
+#
+# To activate, set in .env:
+#   SYSTEM_SPECS_PATH=artifacts/system_specs.yaml
+#   ENABLE_INSTRUCTED_RETRIEVAL=true
+
+# ---------------------------------------------------------------------------
+# Index schema — fields available in your vector search index.
+# The LLM uses these to generate structured filter conditions.
+# ---------------------------------------------------------------------------
+index_schema:
+  - name: product_brand
+    field_type: string
+    description: The brand or manufacturer of the product being discussed
+    filterable: true
+    examples:
+      - "FooBrand"
+      - "AcmeTech"
+      - "NovaCorp"
+
+  - name: doc_type
+    field_type: string
+    description: The type of document — either a customer review or an official product spec
+    filterable: true
+    examples:
+      - "customer_review"
+      - "product_spec"
+      - "product_faq"
+
+  - name: doc_timestamp
+    field_type: timestamp
+    description: Publication or last-updated timestamp of the document
+    filterable: true
+    examples:
+      - "2024-06-15T00:00:00.000+00:00"
+      - "2023-01-01T00:00:00.000+00:00"
+
+  - name: product_line
+    field_type: string
+    description: Specific product line or model family (e.g. "Pro", "Lite", "Ultra")
+    filterable: true
+    examples:
+      - "Pro"
+      - "Lite"
+      - "Ultra"
+      - "Standard"
+
+# ---------------------------------------------------------------------------
+# User instructions — persistent behavioral rules for this deployment.
+# Injected into every query rewrite and generation call.
+# ---------------------------------------------------------------------------
+user_instructions:
+  - instruction_type: recency
+    description: >
+      Prioritize customer reviews published within the last 2–3 years.
+      Older reviews are less reliable due to product updates and firmware changes.
+    field_name: doc_timestamp
+    priority: 8
+
+  - instruction_type: inclusion
+    description: >
+      When answering questions about a specific brand, always retrieve both
+      recent customer reviews (doc_type = customer_review) AND the official
+      product specification document (doc_type = product_spec) to give a
+      complete and balanced answer.
+    priority: 9
+
+  - instruction_type: exclusion
+    description: >
+      Do not include results about "Lite" product lines when the user asks
+      about performance or longevity — Lite models have different hardware specs.
+    field_name: product_line
+    priority: 6
+
+# ---------------------------------------------------------------------------
+# Response constraints — rules for the answer generation stage.
+# ---------------------------------------------------------------------------
+response_constraints:
+  max_length: 100
+  tone: concise and factual
+  language: English
+  grounding: >
+    Base the answer strictly on the retrieved documents. If the retrieved
+    documents do not contain enough information to answer the question
+    confidently, say so rather than speculating.
+
+# ---------------------------------------------------------------------------
+# Expected categories — used by the CategoryClassifier to route queries.
+# ---------------------------------------------------------------------------
+expected_categories:
+  battery_and_power: "Questions about battery life, charging speed, power consumption, or runtime"
+  performance: "Questions about processor speed, memory, storage, or general performance benchmarks"
+  durability: "Questions about build quality, drop resistance, water resistance, or longevity"
+  compatibility: "Questions about software compatibility, accessories, or cross-device support"
+  pricing_and_availability: "Questions about cost, discounts, or where to purchase"
+
+# ---------------------------------------------------------------------------
+# Labeled examples — <query, document, relevance> pairs for few-shot guidance.
+# ---------------------------------------------------------------------------
+examples:
+  - query: "What is the battery life expectancy for FooBrand products?"
+    document: "FooBrand Pro 2024 — Official Spec Sheet: 5,000 mAh battery, rated for 800 full charge cycles, ~3 year lifespan under normal use."
+    relevance_reason: "Official spec directly addresses battery longevity with quantified data."
+    category: battery_and_power
+    category_reasoning: "Explicitly asks about battery life expectancy."
+
+  - query: "What is the battery life expectancy for FooBrand products?"
+    document: "Customer review (2024): 'Had my FooBrand Pro for 2 years — battery still holds 90% capacity with daily use.'"
+    relevance_reason: "Real-world corroboration of the official spec from a recent review."
+    category: battery_and_power
+    category_reasoning: "Review speaks directly to battery performance over time."
+
+  - query: "Does FooBrand make a good laptop for cold weather?"
+    document: "FooBrand Lite 2023 — Spec Sheet: rated for operating temperatures 0°C to 35°C."
+    relevance_reason: "Provides operating temperature range, relevant to cold-weather use."
+    category: durability
+    category_reasoning: "Cold-weather suitability relates to hardware durability and environmental tolerance."
